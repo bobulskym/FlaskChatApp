@@ -30,6 +30,11 @@
             }
         }
 
+        function scrollToBottom() {
+            const chatBox = document.getElementById("chat-box");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
         function loadChatHistory() {
             const token = localStorage.getItem("token");
             fetch('http://0.0.0.0:5000/chat', {
@@ -42,6 +47,7 @@
                 data.chat.forEach(entry => {
                     chatBox.innerHTML += `<p class="chat-message"><strong>${entry.nickname} [${entry.timestamp}]:</strong> ${entry.message}</p>`;
                 });
+                scrollToBottom();
             });
         }
 
@@ -58,6 +64,7 @@
         socket.on("message", (data) => {
             const chatBox = document.getElementById("chat-box");
             chatBox.innerHTML += `<p class="chat-message"><strong>${data.nickname} [${data.timestamp}]:</strong> ${data.message}</p>`;
+            scrollToBottom();
         });
 
         function sendMessage() {
