@@ -45,6 +45,16 @@
             });
         }
 
+        socket.on("delete", (data) => {
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = "";
+        });
+
+        function clearChat() {
+            const token = localStorage.getItem("token");
+            socket.emit("delete", { token });
+        }
+
         socket.on("message", (data) => {
             const chatBox = document.getElementById("chat-box");
             chatBox.innerHTML += `<p class="chat-message"><strong>${data.nickname} [${data.timestamp}]:</strong> ${data.message}</p>`;
@@ -55,18 +65,6 @@
             const token = localStorage.getItem("token");
             socket.emit("message", { message, token });
             document.getElementById("message").value = ""; // Clear input field
-        }
-
-        function clearChat() {
-            const token = localStorage.getItem("token");
-            fetch('http://0.0.0.0:5000/chat/clear', {
-                method: 'POST',
-                headers: { 'Authorization': token }
-            })
-            .then(response => response.json())
-            .then(() => {
-                window.location.reload(); // Reload the page after clearing chat
-            });
         }
 
         function logout() {

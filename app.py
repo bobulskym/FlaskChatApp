@@ -126,17 +126,19 @@ def get_chat():
         return jsonify({'error': 'Unauthorized'}), 401
     return jsonify({'chat': load_chat_history()})
 
-@app.route('/chat/clear', methods=['POST'])
-def clear_chat():
-    token = request.headers.get("Authorization")
+@socketio.on("delete")
+def clear_chat(data):
+    token = data.get("token")
     user = verify_token(token)
     if not user:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
+        return
+
     with open(CHAT_FILE, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["nickname", "message", "timestamp"])
-    return jsonify({'success': True, 'message': 'Chat history cleared'})
+    
+    # Broadcast the message to all connected clients
+    socketio.emit("delete", "Chat deleted!")
 
 @socketio.on("message")
 def handle_message(data):
@@ -149,7 +151,7 @@ def handle_message(data):
     chat_entry = save_chat_entry(user, message)
     
     # Broadcast the message to all connected clients
-    send(chat_entry, broadcast=True)
+    socketio.emit("message", chat_entry)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
