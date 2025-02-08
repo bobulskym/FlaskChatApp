@@ -172,3 +172,7 @@ cython_debug/
 
 # .DS_Store
 .DS_Store
+
+# Don't pass users and messages
+chat_history.csv
+users.csv

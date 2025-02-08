@@ -1,0 +1,99 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #a18cd1, #fbc2eb); /* Softer gradient */
+    color: black;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+/* Centered Containers */
+.container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.7); /* Light transparent background */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Fields */
+input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    color: black;
+    border: 1px solid #ddd;
+}
+
+/* Input Placeholder Color */
+input::placeholder {
+    color: #555;
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+.register-btn { background: #ff9a8b; } /* Lighter Coral */
+.login-btn { background: #8fd3f4; }  /* Light Blue */
+.send-btn { background: #ffcb77; }   /* Soft Orange */
+.clear-btn { background: #ff7eb3; }  /* Light Red */
+.logout-btn { background: #6b7fd7; } /* Light Purple */
+
+/* Chat Box */
+#chat-box {
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.6); /* Lighter chat background */
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Chat Messages */
+.chat-message {
+    padding: 8px;
+    border-radius: 5px;
+    margin: 5px 0;
+    text-align: left;
+    color: black;
+}
+
+/* Lighter alternating colors for messages */
+.chat-message:nth-child(even) {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.chat-message:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile Styles */
+@media (max-width: 600px) {
+    .container {
+        width: 90%;
+    }
+
+    input, button {
+        font-size: 14px;
+    }
+}

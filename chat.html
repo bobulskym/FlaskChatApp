@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Chat Room</h1>
+
+        <button class="logout-btn" onclick="logout()">Logout</button>
+
+        <div id="chat-box"></div>
+
+        <input type="text" id="message" placeholder="Type a message">
+        <button class="send-btn" onclick="sendMessage()">Send</button>
+        <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+    </div>
+
+    <script>
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = "index.html";
+            }
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            const token = localStorage.getItem('token');
+
+            fetch('http://0.0.0.0:5000/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'Authorization': token},
+                body: JSON.stringify({message})
+            })
+            .then(response => response.json())
+            .then(() => {
+                document.getElementById('message').value = '';
+                loadChat();
+            });
+        }
+
+        function loadChat() {
+            const token = localStorage.getItem('token');
+            fetch('http://0.0.0.0:5000/chat', {
+                headers: {'Authorization': token}
+            })
+            .then(response => response.json())
+            .then(data => {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = '';
+                data.chat.forEach(entry => {
+                    chatBox.innerHTML += `<p class="chat-message"><strong>${entry.nickname} [${entry.timestamp}]:</strong> ${entry.message}</p>`;
+                });
+            });
+        }
+
+        function clearChat() {
+            const token = localStorage.getItem('token');
+            fetch('http://127.0.0.1:5000/chat/clear', {
+                method: 'POST',
+                headers: {'Authorization': token}
+            })
+            .then(() => {
+                document.getElementById('chat-box').innerHTML = '';
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = "index.html";
+        }
+
+        checkAuth();
+        loadChat();
+    </script>
+</body>
+</html>

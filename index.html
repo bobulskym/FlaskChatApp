@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Chat</h1>
+        
+        <input type="text" id="nickname" placeholder="Enter your nickname">
+        <input type="password" id="password" placeholder="Enter your password">
+        
+        <button class="register-btn" onclick="register()">Register</button>
+        <button class="login-btn" onclick="login()">Login</button>
+
+        <p id="auth-message"></p>
+    </div>
+
+    <script>
+        function register() {
+            const nickname = document.getElementById('nickname').value;
+            const password = document.getElementById('password').value;
+
+            fetch('http://0.0.0.0:5000/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({nickname, password})
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('auth-message').innerText = data.success ? "Registration successful! Please log in." : data.error;
+            });
+        }
+
+        function login() {
+            const nickname = document.getElementById('nickname').value;
+            const password = document.getElementById('password').value;
+
+            fetch('http://0.0.0.0:5000/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({nickname, password})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    window.location.href = "chat.html";
+                } else {
+                    document.getElementById('auth-message').innerText = "Invalid credentials";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
