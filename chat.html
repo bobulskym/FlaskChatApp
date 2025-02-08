@@ -5,77 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Room</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Chat Room</h1>
 
         <button class="logout-btn" onclick="logout()">Logout</button>
+        <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
 
         <div id="chat-box"></div>
 
         <input type="text" id="message" placeholder="Type a message">
         <button class="send-btn" onclick="sendMessage()">Send</button>
-        <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
     </div>
 
     <script>
+        const socket = io("http://0.0.0.0:5000");
+
         function checkAuth() {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem("token");
             if (!token) {
                 window.location.href = "index.html";
             }
         }
 
-        function sendMessage() {
-            const message = document.getElementById('message').value;
-            const token = localStorage.getItem('token');
-
+        function loadChatHistory() {
+            const token = localStorage.getItem("token");
             fetch('http://0.0.0.0:5000/chat', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'Authorization': token},
-                body: JSON.stringify({message})
-            })
-            .then(response => response.json())
-            .then(() => {
-                document.getElementById('message').value = '';
-                loadChat();
-            });
-        }
-
-        function loadChat() {
-            const token = localStorage.getItem('token');
-            fetch('http://0.0.0.0:5000/chat', {
-                headers: {'Authorization': token}
+                headers: { 'Authorization': token }
             })
             .then(response => response.json())
             .then(data => {
-                const chatBox = document.getElementById('chat-box');
-                chatBox.innerHTML = '';
+                const chatBox = document.getElementById("chat-box");
+                chatBox.innerHTML = ""; // Clear existing content
                 data.chat.forEach(entry => {
                     chatBox.innerHTML += `<p class="chat-message"><strong>${entry.nickname} [${entry.timestamp}]:</strong> ${entry.message}</p>`;
                 });
             });
         }
 
+        socket.on("message", (data) => {
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<p class="chat-message"><strong>${data.nickname} [${data.timestamp}]:</strong> ${data.message}</p>`;
+        });
+
+        function sendMessage() {
+            const message = document.getElementById("message").value;
+            const token = localStorage.getItem("token");
+            socket.emit("message", { message, token });
+            document.getElementById("message").value = ""; // Clear input field
+        }
+
         function clearChat() {
-            const token = localStorage.getItem('token');
-            fetch('http://127.0.0.1:5000/chat/clear', {
+            const token = localStorage.getItem("token");
+            fetch('http://0.0.0.0:5000/chat/clear', {
                 method: 'POST',
-                headers: {'Authorization': token}
+                headers: { 'Authorization': token }
             })
+            .then(response => response.json())
             .then(() => {
-                document.getElementById('chat-box').innerHTML = '';
+                window.location.reload(); // Reload the page after clearing chat
             });
         }
 
         function logout() {
-            localStorage.removeItem('token');
+            localStorage.removeItem("token");
             window.location.href = "index.html";
         }
 
         checkAuth();
-        loadChat();
+        loadChatHistory(); // Load chat history on page load
     </script>
 </body>
 </html>

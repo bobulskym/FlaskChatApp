@@ -1,5 +1,9 @@
+import eventlet
+eventlet.monkey_patch()  # Ensure compatibility
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_socketio import SocketIO, send
 from datetime import datetime, timedelta
 import csv
 import jwt
@@ -7,10 +11,11 @@ import hashlib
 
 app = Flask(__name__)
 CORS(app)  # Allow requests from the frontend
+socketio = SocketIO(app, cors_allowed_origins="*")  # Enable WebSockets
 
 CHAT_FILE = "chat_history.csv"
 USERS_FILE = "users.csv"
-SECRET_KEY = "your_secret_key"  # Change this to a secure key
+SECRET_KEY = "tancovalarybasrakom"
 
 def initialize_files():
     try:
@@ -121,22 +126,6 @@ def get_chat():
         return jsonify({'error': 'Unauthorized'}), 401
     return jsonify({'chat': load_chat_history()})
 
-@app.route('/chat', methods=['POST'])
-def post_chat():
-    token = request.headers.get("Authorization")
-    user = verify_token(token)
-    if not user:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    data = request.json
-    message = data.get('message')
-    
-    if not message:
-        return jsonify({'success': False, 'error': 'Message is required!'}), 400
-    
-    chat_entry = save_chat_entry(user, message)
-    return jsonify({'success': True, 'chat': chat_entry})
-
 @app.route('/chat/clear', methods=['POST'])
 def clear_chat():
     token = request.headers.get("Authorization")
@@ -149,5 +138,19 @@ def clear_chat():
         writer.writerow(["nickname", "message", "timestamp"])
     return jsonify({'success': True, 'message': 'Chat history cleared'})
 
+@socketio.on("message")
+def handle_message(data):
+    token = data.get("token")
+    user = verify_token(token)
+    if not user:
+        return
+
+    message = data.get("message")
+    chat_entry = save_chat_entry(user, message)
+    
+    # Broadcast the message to all connected clients
+    send(chat_entry, broadcast=True)
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000)
+
